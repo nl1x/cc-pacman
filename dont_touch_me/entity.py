@@ -60,7 +60,7 @@ class Entity(pygame.sprite.Sprite):
     def move_down(self):
         self.set_direction("down")
 
-    def move(self, dt, colliders):
+    def move(self, dt, colliders, window: pygame.Surface):
         if self.direction == 'up':
             self.y -= self.speed * dt
         elif self.direction == 'down':
@@ -75,6 +75,14 @@ class Entity(pygame.sprite.Sprite):
         if collider is not None:
             self.cancel_move(dt)
             return False
+        if self.rect.x > window.get_width():
+            self.set_position(0, self.rect.y)
+        if self.rect.y > window.get_height():
+            self.set_position(self.rect.x, 0)
+        if self.rect.left < 0:
+            self.set_position(window.get_width(), self.rect.y)
+        if self.rect.top < 0:
+            self.set_position(self.rect.x, window.get_height())
         return True
 
     def cancel_move(self, dt):
@@ -151,7 +159,7 @@ class Enemy(Entity):
     def update(self,
                dt, window,
                colliders: list[tile.Tile]):
-        while not self.move(dt, colliders):
+        while not self.move(dt, colliders, window):
             self.direction = ["right", "left", "up", "down"][randint(0, 3)]
         self.animate_texture(dt)
         self.draw(window)
@@ -178,15 +186,15 @@ class Player(Entity):
                colliders: list[tile.Tile],
                coins: list[tile.Tile],
                enemies: list[Enemy]):
-        if not self.move(dt, colliders):
+        if not self.move(dt, colliders, window):
             direction = self.direction
             self.direction = self.previous_direction
-            self.move(dt, colliders)
+            self.move(dt, colliders, window)
             self.direction = direction
         else:
             self.update_texture()
 
-        coin: tile.Tile = pygame.sprite.spritecollideany(self, coins)
+        coin = pygame.sprite.spritecollideany(self, coins)
         if coin is not None:
             coins.remove(coin)
             self.score += coin.eat_coin(map_image)
