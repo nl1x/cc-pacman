@@ -200,7 +200,7 @@ class Player(Entity):
             self.score += coin.eat_coin(map_image)
 
         enemy = pygame.sprite.spritecollideany(self, enemies)
-        if enemy is not None:
+        if enemy is not None or len(coins) == 0:
             pygame.quit()
             sys.exit()
 
