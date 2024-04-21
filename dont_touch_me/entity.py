@@ -4,6 +4,7 @@ from random import randint
 import dont_touch_me.constants as const
 import dont_touch_me.tile as tile
 import pygame
+import sys
 
 
 def load_sprite_texture(texture: Texture, texture_index: int) -> pygame.surface.Surface:
@@ -29,7 +30,6 @@ class Entity(pygame.sprite.Sprite):
         self.speed = speed
         self.previous_direction = "right"
         self.direction = "right"
-        self.next_direction = "right"
         self.animation_frames = []  # Liste des images d'animation
         self.current_frame_index = 0
         self.animation_speed = 0.1
@@ -96,9 +96,9 @@ class Entity(pygame.sprite.Sprite):
             self.animation_timer = 0.0
 
     def set_direction(self, direction):
-        self.previous_direction = self.direction
-        self.direction = direction
-        self.next_direction = direction
+        if self.direction != direction:
+            self.previous_direction = self.direction
+            self.direction = direction
 
     def set_position(self, x, y):
         self.x = x
@@ -127,11 +127,6 @@ class Entity(pygame.sprite.Sprite):
 
     def get_tile_pos(self) -> tuple[int, int]:
         return self.x // const.SPRITE_SIZE[0], self.y // const.SPRITE_SIZE[1]
-
-    def _update(self, dt, window, walls, *args, **kwargs):
-        self.move(dt, walls)
-        self.animate_texture(dt)
-        self.draw(window)
 
 
 class Enemy(Entity):
@@ -184,20 +179,22 @@ class Player(Entity):
                coins: list[tile.Tile],
                enemies: list[Enemy]):
         if not self.move(dt, colliders):
+            direction = self.direction
             self.direction = self.previous_direction
             self.move(dt, colliders)
-            self.direction = self.next_direction
+            self.direction = direction
         else:
-            self.next_direction = self.direction
-            self.previous_direction = self.direction
             self.update_texture()
 
-        coin = pygame.sprite.spritecollideany(self, coins)
+        coin: tile.Tile = pygame.sprite.spritecollideany(self, coins)
         if coin is not None:
             coins.remove(coin)
-            coin: tile.Tile
             self.score += coin.eat_coin(map_image)
-            print(self.score)
+
+        enemy = pygame.sprite.spritecollideany(self, enemies)
+        if enemy is not None:
+            pygame.quit()
+            sys.exit()
 
         self.animate_texture(dt)
         self.draw(window)
