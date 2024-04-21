@@ -33,7 +33,7 @@ def load_map(filename) -> tuple[_map.pygame.Surface, list[_map.Tile], list[_map.
             y += 1
             line = file.readline()
     maze = _map.pygame.Surface((len(tiles[0]) * const.TILE_MAP_SIZE[0], len(tiles) * const.TILE_MAP_SIZE[1]))
-    maze.fill((255, 255, 255))
+    maze.fill((0, 0, 0))
     for i in range(len(tiles)):
         for j in range(len(tiles[i])):
             tile = tiles[i][j]
