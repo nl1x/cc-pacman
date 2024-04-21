@@ -7,15 +7,15 @@ import sys
 # --- Initialisation de Pygame ---
 pygame.init()
 
-# --- Configuration de la fenêtre ---
-window = pygame.display.set_mode((const.WIDTH, const.HEIGHT))
-pygame.display.set_caption("MyPacman")
-WHITE = (255, 255, 255)
-
 # --- Configuration des composants ---
 map_image, walls, coins, enemies_spawns = loader.load_map("map")
 player = entity.Player()
 enemies = []
+
+# --- Configuration de la fenêtre ---
+window = pygame.display.set_mode((map_image.get_width(), map_image.get_height()))
+pygame.display.set_caption("MyPacman")
+BLACK = (0, 0, 0)
 
 for i in range(3):
     spawn = enemies_spawns[randint(0, len(enemies_spawns) - 1)]
@@ -44,7 +44,7 @@ while running:
                 player.move_right()
 
     # Réinitialiser la fenêtre
-    window.fill(WHITE)
+    window.fill(BLACK)
 
     # Afficher la map
     window.blit(map_image, (0, 0))
