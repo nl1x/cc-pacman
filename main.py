@@ -1,4 +1,4 @@
-from dont_touch_me import constants as const, loader, entity
+from dont_touch_me import loader, entity
 from random import randint
 
 import pygame
