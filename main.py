@@ -13,7 +13,7 @@ pygame.display.set_caption("MyPacman")
 WHITE = (255, 255, 255)
 
 # --- Configuration des composants ---
-map_image, walls, coins, enemies_spawns = loader.load_map("test")
+map_image, walls, coins, enemies_spawns = loader.load_map("map")
 player = entity.Player()
 enemies = []
 
