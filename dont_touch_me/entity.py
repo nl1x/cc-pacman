@@ -146,8 +146,9 @@ class Enemy(Entity):
         self.UP_ANIMATION_FRAME = None
         self.DOWN_ANIMATION_FRAME = None
         self.movement_timer = 0.0
-        self.next_movement_time = 5
+        self.next_movement_time = 7
         self.load_textures()
+        self.set_direction(["up", "left", "down", "right"][randint(0, 3)])
 
     def load_textures(self):
         texture_sheet = Texture("assets/sprites.png")
@@ -156,7 +157,6 @@ class Enemy(Entity):
         self.set_up_animation_frame(load_sprite_texture(texture_sheet, 60))
         self.set_down_animation_frame(load_sprite_texture(texture_sheet, 62))
         self.set_animation_frames([self.RIGHT_ANIMATION_FRAME])
-        self.move_right()
 
     def update(self,
                dt, window,
@@ -164,9 +164,9 @@ class Enemy(Entity):
         self.movement_timer += dt
         if self.movement_timer > self.next_movement_time:
             self.movement_timer = 0.0
-            self.direction = ["right", "left", "up", "down"][randint(0, 3)]
+            self.set_direction(["down", "left", "up", "right"][randint(0, 3)])
         while not self.move(dt, colliders, window):
-            self.direction = ["right", "left", "up", "down"][randint(0, 3)]
+            self.set_direction(["down", "left", "up", "right"][randint(0, 3)])
         self.animate_texture(dt)
         self.draw(window)
 
@@ -176,7 +176,7 @@ class Player(Entity):
     def __init__(self):
         Entity.__init__(self, 16, 16)
         self.score = 0
-        self.next_objective = 10
+        self.next_objective = 20
         self.load_textures()
 
     def load_textures(self):
@@ -207,7 +207,7 @@ class Player(Entity):
             coins.remove(coin)
             self.score += coin.eat_coin(map_image)
             if self.score >= self.next_objective:
-                self.next_objective += 10
+                self.next_objective += 20
                 spawn = enemies_spawns[randint(0, len(enemies_spawns) - 1)]
                 enemies.append(Enemy(spawn))
 
