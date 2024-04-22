@@ -1,10 +1,7 @@
 from dont_touch_me.texture import Texture
-from random import randint
 
 import dont_touch_me.constants as const
-import dont_touch_me.tile as tile
 import pygame
-import sys
 
 
 def load_sprite_texture(texture: Texture, texture_index: int) -> pygame.surface.Surface:
@@ -28,8 +25,8 @@ class Entity(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.speed = speed
-        self.previous_direction = "right"
-        self.direction = "right"
+        self.previous_direction = pygame.K_RIGHT
+        self.direction = pygame.K_RIGHT
         self.animation_frames = []  # Liste des images d'animation
         self.current_frame_index = 0
         self.animation_speed = 0.1
@@ -49,25 +46,25 @@ class Entity(pygame.sprite.Sprite):
         self.UP_ANIMATION_FRAME = frame
 
     def move_right(self):
-        self.set_direction("right")
+        self.set_direction(pygame.K_RIGHT)
 
     def move_left(self):
-        self.set_direction("left")
+        self.set_direction(pygame.K_LEFT)
 
     def move_up(self):
-        self.set_direction("up")
+        self.set_direction(pygame.K_UP)
 
     def move_down(self):
-        self.set_direction("down")
+        self.set_direction(pygame.K_DOWN)
 
     def move(self, dt, colliders, window: pygame.Surface):
-        if self.direction == 'up':
+        if self.direction == pygame.K_UP:
             self.y -= self.speed * dt
-        elif self.direction == 'down':
+        elif self.direction == pygame.K_DOWN:
             self.y += self.speed * dt
-        elif self.direction == 'left':
+        elif self.direction == pygame.K_LEFT:
             self.x -= self.speed * dt
-        elif self.direction == 'right':
+        elif self.direction == pygame.K_RIGHT:
             self.x += self.speed * dt
         self.rect.x = self.x
         self.rect.y = self.y
@@ -86,13 +83,13 @@ class Entity(pygame.sprite.Sprite):
         return True
 
     def cancel_move(self, dt):
-        if self.direction == 'up':
+        if self.direction == pygame.K_UP:
             self.y += self.speed * dt
-        elif self.direction == 'down':
+        elif self.direction == pygame.K_DOWN:
             self.y -= self.speed * dt
-        elif self.direction == 'left':
+        elif self.direction == pygame.K_LEFT:
             self.x += self.speed * dt
-        elif self.direction == 'right':
+        elif self.direction == pygame.K_RIGHT:
             self.x -= self.speed * dt
         self.rect.x = self.x
         self.rect.y = self.y
@@ -121,13 +118,13 @@ class Entity(pygame.sprite.Sprite):
         self.animation_frames = frames
 
     def update_texture(self):
-        if self.direction == 'right':
+        if self.direction == pygame.K_RIGHT:
             self.animation_frames[0] = self.RIGHT_ANIMATION_FRAME
-        elif self.direction == 'left':
+        elif self.direction == pygame.K_LEFT:
             self.animation_frames[0] = self.LEFT_ANIMATION_FRAME
-        elif self.direction == 'down':
+        elif self.direction == pygame.K_DOWN:
             self.animation_frames[0] = self.DOWN_ANIMATION_FRAME
-        elif self.direction == 'up':
+        elif self.direction == pygame.K_UP:
             self.animation_frames[0] = self.UP_ANIMATION_FRAME
 
     def draw(self, surface: pygame.surface.Surface):
@@ -135,87 +132,3 @@ class Entity(pygame.sprite.Sprite):
 
     def get_tile_pos(self) -> tuple[int, int]:
         return self.x // const.SPRITE_SIZE[0], self.y // const.SPRITE_SIZE[1]
-
-
-class Enemy(Entity):
-
-    def __init__(self, spawn: tile.Tile):
-        Entity.__init__(self, spawn.x, spawn.y)
-        self.RIGHT_ANIMATION_FRAME = None
-        self.LEFT_ANIMATION_FRAME = None
-        self.UP_ANIMATION_FRAME = None
-        self.DOWN_ANIMATION_FRAME = None
-        self.movement_timer = 0.0
-        self.next_movement_time = 7
-        self.load_textures()
-        self.set_direction(["up", "left", "down", "right"][randint(0, 3)])
-
-    def load_textures(self):
-        texture_sheet = Texture("assets/sprites.png")
-        self.set_right_animation_frame(load_sprite_texture(texture_sheet, 56))
-        self.set_left_animation_frame(load_sprite_texture(texture_sheet, 58))
-        self.set_up_animation_frame(load_sprite_texture(texture_sheet, 60))
-        self.set_down_animation_frame(load_sprite_texture(texture_sheet, 62))
-        self.set_animation_frames([self.RIGHT_ANIMATION_FRAME])
-
-    def update(self,
-               dt, window,
-               colliders: list[tile.Tile]):
-        self.movement_timer += dt
-        if self.movement_timer > self.next_movement_time:
-            self.movement_timer = 0.0
-            self.set_direction(["down", "left", "up", "right"][randint(0, 3)])
-        while not self.move(dt, colliders, window):
-            self.set_direction(["down", "left", "up", "right"][randint(0, 3)])
-        self.animate_texture(dt)
-        self.draw(window)
-
-
-class Player(Entity):
-
-    def __init__(self):
-        Entity.__init__(self, 16, 16)
-        self.score = 0
-        self.next_objective = 20
-        self.load_textures()
-
-    def load_textures(self):
-        texture_sheet = Texture("assets/sprites.png")
-        self.set_right_animation_frame(load_sprite_texture(texture_sheet, 1))
-        self.set_left_animation_frame(load_sprite_texture(texture_sheet, 15))
-        self.set_up_animation_frame(load_sprite_texture(texture_sheet, 29))
-        self.set_down_animation_frame(load_sprite_texture(texture_sheet, 43))
-        self.set_animation_frames([None, load_sprite_texture(texture_sheet, 2)])
-        self.move_right()
-
-    def update(self,
-               dt, window, map_image,
-               colliders: list[tile.Tile],
-               coins: list[tile.Tile],
-               enemies: list[Enemy],
-               enemies_spawns):
-        if not self.move(dt, colliders, window):
-            direction = self.direction
-            self.direction = self.previous_direction
-            self.move(dt, colliders, window)
-            self.direction = direction
-        else:
-            self.update_texture()
-
-        coin = pygame.sprite.spritecollideany(self, coins)
-        if coin is not None:
-            coins.remove(coin)
-            self.score += coin.eat_coin(map_image)
-            if self.score >= self.next_objective:
-                self.next_objective += 20
-                spawn = enemies_spawns[randint(0, len(enemies_spawns) - 1)]
-                enemies.append(Enemy(spawn))
-
-        enemy = pygame.sprite.spritecollideany(self, enemies)
-        if enemy is not None or len(coins) == 0:
-            pygame.quit()
-            sys.exit()
-
-        self.animate_texture(dt)
-        self.draw(window)
-
