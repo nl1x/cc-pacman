@@ -54,7 +54,7 @@ while running:
         enemy.update(dt, window, walls)
 
     # Mettre à jour le joueur
-    player.update(dt, window, map_image, walls, coins, enemies)
+    player.update(dt, window, map_image, walls, coins, enemies, enemies_spawns)
 
     # Mettre à jour la fenêtre
     pygame.display.flip()
