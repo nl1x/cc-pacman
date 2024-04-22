@@ -1,4 +1,4 @@
-from dont_touch_me import loader, entity, texture, tile
+from dont_touch_me import loader, entity, texture, tile, constants as const
 from random import randint
 
 import pygame
@@ -17,7 +17,7 @@ class Enemy(entity.Entity):
         self.movement_timer = 0.0
         self.next_movement_time = 7
         self.load_textures()
-        self.set_direction([pygame.K_UP, pygame.K_LEFT, pygame.K_DOWN, pygame.K_RIGHT][randint(0, 3)])
+        self.set_direction(const.DIRECTIONS[randint(0, 3)])
 
     def load_textures(self):
         texture_sheet = texture.Texture("assets/sprites.png")
@@ -27,15 +27,13 @@ class Enemy(entity.Entity):
         self.set_down_animation_frame(entity.load_sprite_texture(texture_sheet, 62))
         self.set_animation_frames([self.RIGHT_ANIMATION_FRAME])
 
-    def update(self,
-               dt, window,
-               colliders: list[tile.Tile]):
+    def update(self, dt, window, colliders: list[tile.Tile]):
         self.movement_timer += dt
         if self.movement_timer > self.next_movement_time:
             self.movement_timer = 0.0
-            self.set_direction([pygame.K_DOWN, pygame.K_LEFT, pygame.K_UP, pygame.K_RIGHT][randint(0, 3)])
+            self.set_direction(const.DIRECTIONS[randint(0, 3)])
         while not self.move(dt, colliders, window):
-            self.set_direction([pygame.K_DOWN, pygame.K_LEFT, pygame.K_UP, pygame.K_RIGHT][randint(0, 3)])
+            self.set_direction(const.DIRECTIONS[randint(0, 3)])
         self.animate_texture(dt)
         self.draw(window)
 
