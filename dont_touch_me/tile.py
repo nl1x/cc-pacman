@@ -1,8 +1,36 @@
 from dont_touch_me.texture import Texture
 
+import dont_touch_me.constants as const
 import pygame
 
+
+def load_surface(texture, x, y, width, height) -> pygame.Surface:
+    surface = pygame.Surface([width, height])
+    surface.blit(texture, (0, 0), (x * const.TILE_MAP_SIZE[0], y * const.TILE_MAP_SIZE[1], width, height))
+    return surface
+
+
+tile_sheet = pygame.image.load("assets/map_sheet.png")
+
 colliders_code = [92, 44, 140]
+tiles = {
+    "A": load_surface(tile_sheet, 2, 5, *const.TILE_MAP_SIZE),
+    "B": load_surface(tile_sheet, 3, 5, *const.TILE_MAP_SIZE),
+    "C": load_surface(tile_sheet, 4, 5, *const.TILE_MAP_SIZE),
+    "D": load_surface(tile_sheet, 5, 5, *const.TILE_MAP_SIZE),
+    "F": load_surface(tile_sheet, 6, 5, *const.TILE_MAP_SIZE),
+    "E": load_surface(tile_sheet, 7, 5, *const.TILE_MAP_SIZE),
+    "I": load_surface(tile_sheet, 8, 5, *const.TILE_MAP_SIZE),
+    "H": load_surface(tile_sheet, 9, 5, *const.TILE_MAP_SIZE),
+    "L": load_surface(tile_sheet, 4, 4, *const.TILE_MAP_SIZE),
+    "G": load_surface(tile_sheet, 15, 3, *const.TILE_MAP_SIZE),
+    "P": load_surface(tile_sheet, 8, 4, *const.TILE_MAP_SIZE),
+    "R": load_surface(tile_sheet, 9, 4, *const.TILE_MAP_SIZE),
+    ".": load_surface(tile_sheet, 13, 5, *const.TILE_MAP_SIZE),
+    "*": load_surface(tile_sheet, 14, 5, *const.TILE_MAP_SIZE),
+    "/": load_surface(tile_sheet, 12, 5, *const.TILE_MAP_SIZE),
+    " ": load_surface(tile_sheet, 12, 5, *const.TILE_MAP_SIZE)
+}
 
 
 class Tile(pygame.sprite.Sprite):
@@ -10,28 +38,13 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self,
                  code: str,
                  x: int, y: int,
-                 tile_width: int,
-                 tile_height: int):
+                 image: pygame.Surface):
         pygame.sprite.Sprite.__init__(self)
         self.code = code
         self.color = None
         self.x = x
         self.y = y
-        self.image = pygame.Surface([tile_width, tile_height])
-        self.is_collider = False
-        if self.code == "W":
-            self.image.fill((0, 20, 108))
-            self.is_collider = True
-        elif self.code == ".":
-            self.image.fill((0, 0, 0))
-            pygame.draw.circle(self.image, (192, 195, 0), (tile_width // 2, tile_height // 2), tile_width // 5)
-            self.is_collider = True
-        elif self.code == "*":
-            self.image.fill((0, 0, 0))
-            pygame.draw.circle(self.image, (192, 195, 0), (tile_width // 2, tile_height // 2), tile_width // 3)
-            self.is_collider = True
-        else:
-            self.image.fill((0, 0, 0))
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -52,7 +65,7 @@ class Tile(pygame.sprite.Sprite):
         return self.code == '*' or self.code == '.'
 
     def is_wall(self):
-        return self.code == 'W'
+        return self.code in ('A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'G', 'L', 'P', 'R')
 
     def is_enemy_spawn(self):
         return self.code == '/'
