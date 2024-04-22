@@ -145,6 +145,8 @@ class Enemy(Entity):
         self.LEFT_ANIMATION_FRAME = None
         self.UP_ANIMATION_FRAME = None
         self.DOWN_ANIMATION_FRAME = None
+        self.movement_timer = 0.0
+        self.next_movement_time = 5
         self.load_textures()
 
     def load_textures(self):
@@ -159,6 +161,10 @@ class Enemy(Entity):
     def update(self,
                dt, window,
                colliders: list[tile.Tile]):
+        self.movement_timer += dt
+        if self.movement_timer > self.next_movement_time:
+            self.movement_timer = 0.0
+            self.direction = ["right", "left", "up", "down"][randint(0, 3)]
         while not self.move(dt, colliders, window):
             self.direction = ["right", "left", "up", "down"][randint(0, 3)]
         self.animate_texture(dt)
@@ -170,6 +176,7 @@ class Player(Entity):
     def __init__(self):
         Entity.__init__(self, 16, 16)
         self.score = 0
+        self.next_objective = 10
         self.load_textures()
 
     def load_textures(self):
@@ -185,7 +192,8 @@ class Player(Entity):
                dt, window, map_image,
                colliders: list[tile.Tile],
                coins: list[tile.Tile],
-               enemies: list[Enemy]):
+               enemies: list[Enemy],
+               enemies_spawns):
         if not self.move(dt, colliders, window):
             direction = self.direction
             self.direction = self.previous_direction
@@ -198,6 +206,10 @@ class Player(Entity):
         if coin is not None:
             coins.remove(coin)
             self.score += coin.eat_coin(map_image)
+            if self.score >= self.next_objective:
+                self.next_objective += 10
+                spawn = enemies_spawns[randint(0, len(enemies_spawns) - 1)]
+                enemies.append(Enemy(spawn))
 
         enemy = pygame.sprite.spritecollideany(self, enemies)
         if enemy is not None or len(coins) == 0:
@@ -207,5 +219,3 @@ class Player(Entity):
         self.animate_texture(dt)
         self.draw(window)
 
-    def get_score(self):
-        return self.score
