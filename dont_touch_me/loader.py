@@ -1,14 +1,14 @@
 import sys
 
 import dont_touch_me.constants as const
-import dont_touch_me.tile as _map
+import dont_touch_me.tile as tile
 
 
-def load_map(filename) -> tuple[_map.pygame.Surface, list[_map.Tile], list[_map.Tile], list[_map.Tile]]:
+def load_map(filename) -> tuple[tile.pygame.Surface, list[tile.Tile], list[tile.Tile], list[tile.Tile]]:
     colliders = []
     coins = []
     enemies_spawn = []
-    tiles: list[list[_map.Tile]] = []
+    tiles: list[list[tile.Tile]] = []
     with open(filename, "r") as file:
         line = file.readline()
         y = 0
@@ -16,26 +16,25 @@ def load_map(filename) -> tuple[_map.pygame.Surface, list[_map.Tile], list[_map.
             tiles.append([])
             for x in range(len(line.strip("\n"))):
                 tile_code = line[x]
-                tile = _map.Tile(
+                tile_sprite = tile.Tile(
                     tile_code,
                     x * const.TILE_MAP_SIZE[0],
                     y * const.TILE_MAP_SIZE[1],
-                    const.TILE_MAP_SIZE[0],
-                    const.TILE_MAP_SIZE[1],
+                    tile.tiles[tile_code]
                 )
-                tiles[y].append(tile)
-                if tile.is_wall():
-                    colliders.append(tile)
-                elif tile.is_coin():
-                    coins.append(tile)
-                elif tile.is_enemy_spawn():
-                    enemies_spawn.append(tile)
+                tiles[y].append(tile_sprite)
+                if tile_sprite.is_wall():
+                    colliders.append(tile_sprite)
+                elif tile_sprite.is_coin():
+                    coins.append(tile_sprite)
+                elif tile_sprite.is_enemy_spawn():
+                    enemies_spawn.append(tile_sprite)
             y += 1
             line = file.readline()
-    maze = _map.pygame.Surface((len(tiles[0]) * const.TILE_MAP_SIZE[0], len(tiles) * const.TILE_MAP_SIZE[1]))
+    maze = tile.pygame.Surface((len(tiles[0]) * const.TILE_MAP_SIZE[0], len(tiles) * const.TILE_MAP_SIZE[1]))
     maze.fill((0, 0, 0))
     for i in range(len(tiles)):
         for j in range(len(tiles[i])):
-            tile = tiles[i][j]
-            maze.blit(tile.image, (tile.x, tile.y))
+            tile_sprite = tiles[i][j]
+            maze.blit(tile_sprite.image, (tile_sprite.x, tile_sprite.y))
     return maze, colliders, coins, enemies_spawn
